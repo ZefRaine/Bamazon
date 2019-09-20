@@ -49,11 +49,11 @@
       else {
         const cost = item.price
         var total = item.stock_quantity - stock;
-        console.log("-----------------\n" + total + " left in stock\n" + "That will cost $" + cost +
+        console.log("-----------------\n" + total + " left in stock\n" + "That will cost $" + cost + " each" +
           "\n-----------------");
       }
+      stockChange(item.item_id, total, connection)
       productSearch(connection)
-      stockChange(answers.item_id, answers.stock_quantity, connection)
     })
   }
 }
@@ -75,7 +75,6 @@ function soulSearch(id, connection) {
 }
 
 function stockChange(id, stock, connection) {
-  console.log(stock, id);
   connection.query(`UPDATE products SET stock_quantity = "${stock}" WHERE item_id = "${id}"`, function (error, results) {
     if (error) throw error;
   })
