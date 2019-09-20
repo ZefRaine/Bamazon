@@ -2,7 +2,7 @@
   const mysql = require("mysql");
   const inquirer = require("inquirer");
 
-  let connection = mysql.createConnection({
+  const connection = mysql.createConnection({
     host: "localhost",
 
     // Your port; if not 3306
@@ -17,9 +17,8 @@
   });
 
   connection.connect(function (err) {
-    if (err) throw err; {
-      productSearch();
-    }
+    if (err) throw err;
+    productSearch(connection);
   });
 
   function runSearch(results) {
@@ -36,54 +35,38 @@
         validate: function (name) {
           return name !== "";
         }
-      }, {
-        name: "exit",
-        message: "Would you like to exit (Y/N) \n",
-        validate: function (name) {
-          return name.toLowerCase() === "y" || name.toLowerCase() === "n"
-        }
       }
-
     ]).then(function (answers) {
 
       const id = parseInt(answers.item_id);
       const item = results.find(function (result) {
         return result.item_id === id;
       });
-      soulSearch(id);
+      soulSearch(id, connection);
       const stock = parseInt(answers.stock_quantity)
       if (item.stock_quantity <= stock)
         console.log("Not enough in stock");
       else {
+        const cost = item.price
         var total = item.stock_quantity - stock;
-        console.log(total + " left in stock\n" +
-          "-----------------");
+        console.log("-----------------\n" + total + " left in stock\n" + "That will cost $" + cost +
+          "\n-----------------");
       }
-      console.log("Looking for anything else?")
-      runSearch(results);
-      if (answers.exit === "y")
-        leaveMe();
-      else(answers.exit === "n"); {
-        leaveMe();
-      }
+      productSearch(connection)
+      stockChange(answers.item_id, answers.stock_quantity, connection)
     })
   }
 }
 
-function leaveMe() {
-  connection.end();
-  process.exit(0);
-}
-
-function productSearch() {
-  connection.query('SELECT item_id, product_name, stock_quantity FROM products', function (error, results) {
+function productSearch(connection) {
+  connection.query('SELECT item_id, product_name, stock_quantity, price FROM products', function (error, results) {
     if (error) throw error;
     console.table(results)
     runSearch(results);
   })
 }
 
-function soulSearch(id) {
+function soulSearch(id, connection) {
   connection.query('SELECT * FROM products WHERE item_id = ?', {
     item_id: id
   }, function (error, results) {
@@ -91,9 +74,9 @@ function soulSearch(id) {
   })
 }
 
-function stockChange(id, stock) {
+function stockChange(id, stock, connection) {
   console.log(stock, id);
-  connection.query(`UPDATE products SET stock_quantity - ${stock} WHERE item_id = "${id}"`, function (error, results) {
+  connection.query(`UPDATE products SET stock_quantity = "${stock}" WHERE item_id = "${id}"`, function (error, results) {
     if (error) throw error;
   })
 }
