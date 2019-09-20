@@ -40,4 +40,4 @@ INSERT INTO products (product_name, price, stock_quantity)
 VALUES ("Magic Eye Poster", 0.25, 100);
 
 INSERT INTO products (product_name, price, stock_quantity)
-VALUES ("Sisqo's Autograph", 0.01, 1);
+VALUES ("Autograph by Sisqo", 0.01, 1);
